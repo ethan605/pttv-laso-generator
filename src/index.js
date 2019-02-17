@@ -172,7 +172,7 @@ async function generateRecords() {
     
     _.each(allRecords, record => {
       generateDocx(record);
-      // convertToPdf(record.id);
+      convertToPdf(record.id);
     });
   } catch (error) {
     console.error(chalk.redBright(error.message));
