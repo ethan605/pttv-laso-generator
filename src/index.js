@@ -124,7 +124,7 @@ async function fetchLasoImage(record) {
   const $ = cheerio.load(pageHtml);
   const imageLink = $('input#barCopy')[0].attribs.value;
   const { data: imageData } = await axios.get(imageLink, { responseType: 'arraybuffer' });
-  const buffer = new Buffer(imageData, 'binary');
+  const buffer = Buffer.alloc(imageData.length, imageData, 'binary');
   const data = buffer.toString('base64');
   return { ...LASO_IMAGE_CONFIGS, data };
 }
@@ -169,13 +169,11 @@ async function convertToPdf(id) {
 async function generateRecords() {
   try {
     const allRecords = await loadRecords();
-    generateDocx(allRecords[0]);
-
-    // _.each(allRecords, record => {
-    //   const { id } = record;
-    //   generateDocx(record);
-    //   convertToPdf(record.id);
-    // });
+    
+    _.each(allRecords, record => {
+      generateDocx(record);
+      // convertToPdf(record.id);
+    });
   } catch (error) {
     console.error(chalk.redBright(error.message));
   }
