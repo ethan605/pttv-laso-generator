@@ -6,18 +6,23 @@
   "author": "Ethan Nguyen <thanhnx.605@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "./node_modules/.bin/babel src --out-dir build",
-    "prebuild": "rm -rf ./build"
+    "build": "babel src/ -d dist/",
+    "prebuild": "rm -rf dist/",
+    "start": "babel-node src/index.js",
+    "watch": "babel -w src/ -d dist/"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "chalk": "^2.4.2",
     "docx4js": "^3.1.16",
+    "docxtemplater": "^3.9.8",
+    "jszip": "2",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.3",
+    "@babel/node": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.14.0",
