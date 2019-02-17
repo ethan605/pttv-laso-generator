@@ -16,9 +16,12 @@
     "@nativedocuments/docx-wasm": "^2.2.8-1547344486",
     "axios": "^0.18.0",
     "chalk": "^2.4.2",
+    "cheerio": "^1.0.0-rc.2",
     "csv": "^5.1.1",
     "docx-templates": "^2.10.0",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "parse5": "^5.1.0",
+    "qs": "^6.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

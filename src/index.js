@@ -6,6 +6,8 @@ import chalk from 'chalk';
 import csv from 'csv';
 import docxWasm from '@nativedocuments/docx-wasm';
 import docxTemplates from 'docx-templates';
+import cheerio from 'cheerio';
+import qs from 'qs';
 
 const BIRTH_HOURS_MAPPING = {
   tys: 'Tý',
@@ -101,11 +103,39 @@ function loadRecords() {
   });
 }
 
-async function generateDocx(id, record) {
-  const { birthDay, birthHour, birthMonth, birthYear, gender, ...rest } = record;
+async function fetchLasoImage(record) {
+  const { birthDay, birthHour, birthMonth, birthYear, gender, id } = record;
+
+  const body = {
+    anh_mau: '1',
+    gio_duong: BIRTH_HOURS_CONVERSION[birthHour],
+    gioi_tinh: gender === 'male' ? '1' : '0',
+    ho_ten: id,
+    loai_lich: '1',
+    luutru: '1',
+    nam_duong: birthYear,
+    nam_xem: '2019',
+    ngay_duong: birthDay,
+    phut_duong: '00',
+    thang_duong: birthMonth,
+  };
+
+  const { data: pageHtml } = await axios.post('https://tuvivietnam.vn/index.php?anlaso/laso', qs.stringify(body));
+  const $ = cheerio.load(pageHtml);
+  const imageLink = $('input#barCopy')[0].attribs.value;
+  const { data: imageData } = await axios.get(imageLink, { responseType: 'arraybuffer' });
+  const buffer = new Buffer(imageData, 'binary');
+  const data = buffer.toString('base64');
+  return { ...LASO_IMAGE_CONFIGS, data };
+}
+
+async function generateDocx(record) {
+  const { birthDay, birthHour, birthMonth, birthYear, gender, id, ...rest } = record;
+  const lasoImage = fetchLasoImage(record);
   
   const data = {
     ...rest,
+    lasoImage,
     birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
     birthHour: BIRTH_HOURS_MAPPING[birthHour],
     gender: GENDERS_MAPPING[gender],
@@ -113,9 +143,6 @@ async function generateDocx(id, record) {
 
   docxTemplates({
     data,
-    additionalJsContext: {
-      renderLasoImage: () => ({ ...LASO_IMAGE_CONFIGS, path: './laso-placeholder.jpg' }),
-    },
     cmdDelimiter: '~',
     output: `./output/${id}.docx`,
     processLineBreaks: true,
@@ -142,36 +169,16 @@ async function convertToPdf(id) {
 async function generateRecords() {
   try {
     const allRecords = await loadRecords();
-    renderLasoImage(allRecords[0]);
+    generateDocx(allRecords[0]);
 
     // _.each(allRecords, record => {
-    //   const { id, ...data } = record;
-    //   generateDocx(id, data);
-    //   convertToPdf(id);
+    //   const { id } = record;
+    //   generateDocx(record);
+    //   convertToPdf(record.id);
     // });
   } catch (error) {
     console.error(chalk.redBright(error.message));
   }
-}
-
-async function renderLasoImage(data) {
-  const { birthDay, birthHour, birthMonth, birthYear, gender, id } = data;
-  const body = {
-    ho_ten: id,
-    gioi_tinh: gender === 'male' ? '1' : '0',
-    loai_lich: '1',
-    ngay_duong: birthDay,
-    thang_duong: birthMonth,
-    nam_duong: birthYear,
-    gio_duong: BIRTH_HOURS_CONVERSION[birthHour],
-    phut_duong: '00',
-    nam_xem: '2019',
-    anh_mau: '1',
-    luutru: '1',
-  };
-
-  const response = await axios.post('https://tuvivietnam.vn/index.php?anlaso/laso', body);
-  console.debug(response);
 }
 
 generateRecords();
