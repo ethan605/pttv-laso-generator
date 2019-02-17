@@ -6,99 +6,109 @@ import csv from 'csv';
 import docxWasm from '@nativedocuments/docx-wasm';
 import docxTemplates from 'docx-templates';
 
-function loadList() {
-  const input = String(fs.readFileSync('./input/list.csv'));
+const LASO_IMAGE_CONFIGS = { extension: '.jpg', height: 16.93, width: 12.7 };
 
-  csv.parse(input, (error, rawRecords) => {
-    if (error != null) {
-      console.error(chalk.redLight(error.message));
-      return;
-    }
+function parseQuestions(rawQuestions) {
+  const compacted = _.compact(rawQuestions);
+  const coupled = _.slice(compacted, 0, compacted.length - (compacted.length % 2));
+  if (_.isEmpty(coupled)) return undefined;
 
-    const records = _.slice(rawRecords, 1);
-    const list = _.map(records, rec => {
-      const [
-        id,
-        fullName,
-        gender,
-        birthHour,
-        birthDay,
-        birthMonth,
-        birthYear,
-        calendar,
-        explainationDetail,
-        ...rawQuestions
-      ] = rec;
+  const questions = _.filter(coupled, (__, idx) => idx % 2 === 0);
+  const answers = _.reject(coupled, (__, idx) => idx % 2 === 0);
+  const pairs = _.unzip([questions, answers]);
+  return _.map(pairs, ([question, answer], index) => ({ answer, title: `${index + 1}. ${question}` }));
+}
 
-      // const questions =
+function parseCsvRecords(records) {
+  return _.map(records, rec => {
+    const [
+      id,
+      fullName,
+      contactDetail,
+      gender,
+      birthHour,
+      birthDay,
+      birthMonth,
+      birthYear,
+      calendar,
+      explanation,
+      ...rawQuestions
+    ] = rec;
 
-      return {
-        birthHour,
-        calendar,
-        fullName,
-        gender,
-        id,
-        birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
-      };
-    });
+    const mainParagraphs = _.split(explanation, '\n');
+    const questions = parseQuestions(rawQuestions);
 
-    console.debug(list);
+    return {
+      birthHour,
+      calendar,
+      contactDetail,
+      fullName,
+      gender,
+      id,
+      mainParagraphs,
+      questions,
+      birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
+    };
   });
 }
 
-function fillTemplate() {
+function loadExplanationsList() {
+  return new Promise((resolve, reject) => {
+    const input = String(fs.readFileSync('./input/explanations_list.csv'));
+
+    csv.parse(input, (error, rawRecords) => {
+      if (error != null) {
+        reject(error);
+        return;
+      }
+
+      const records = _.slice(rawRecords, 1);
+      resolve(parseCsvRecords(records));
+    });
+  });
+}
+
+async function generateDocx(id, data) {
+  docxTemplates({
+    data,
+    additionalJsContext: {
+      renderLasoImage: () => ({ ...LASO_IMAGE_CONFIGS, path: './laso-placeholder.jpg' }),
+    },
+    cmdDelimiter: '~',
+    output: `./output/${id}.docx`,
+    processLineBreaks: true,
+    template: './template.docx',
+  });
+}
+
+async function convertToPdf(id) {
+  await docxWasm.init({
+    ENVIRONMENT: 'NODE',
+    LAZY_INIT: true,
+    ND_DEV_ID: '0P268FOEJBKENB0IUHDKD6JNUT',
+    ND_DEV_SECRET: '01J2TEPVHD3PDGA6G38PRCFMH4',
+  });
+
+  const api = await docxWasm.engine();
+  await api.load(`./output/${id}.docx`);
+  const arrayBuffer = await api.exportPDF();
+  await api.close();
+
+  fs.writeFileSync(`./output/${id}.pdf`, new Uint8Array(arrayBuffer));
+}
+
+async function generateRecords() {
   try {
-    docxTemplates({
-      template: './template.docx',
-      output: './output.docx',
-      cmdDelimiter: '~',
-      data: {
-        full_name: 'Nguyễn Văn A',
-        gender: 'Nam',
-        birth_hour: 'Ngọ',
-        birth_date: '12/08/Đinh Sửu',
-        calendar: 'Âm lịch',
-        contact_type: 'Số điện thoại',
-        contact_detail: '0652455478',
-        explaination_detail: 'Đương số tuổi Ngọ',
-        laso_image: { width: 12.7, height: 16.93, path: './laso_placeholder.jpg', extension: '.jpg' },
-        questions: [
-          {
-            title: '1. Hỏi năm nay làm ăn được không?',
-            answer: 'Năm nay làm ăn tốt',
-          },
-          {
-            title: '2. Gia đình sức khoẻ tốt không?',
-            answer: 'Năm nay làm ăn tốt',
-          },
-        ],
-      },
+    const allExplanations = await loadExplanationsList();
+
+    _.each(allExplanations, data => {
+      const { id } = data;
+      generateDocx(id, data);
+      // convertToPdf(id);
     });
   } catch (error) {
-    console.error(chalk.redLight(error.message));
+    console.error(chalk.redBright(error.message));
   }
 }
 
-async function convertToPdf() {
-  try {
-    await docxWasm.init({
-      ENVIRONMENT: 'NODE',
-      LAZY_INIT: false,
-      ND_DEV_ID: '0P268FOEJBKENB0IUHDKD6JNUT',
-      ND_DEV_SECRET: '01J2TEPVHD3PDGA6G38PRCFMH4',
-    });
-
-    const api = await docxWasm.engine();
-    await api.load('./output.docx');
-    const arrayBuffer = await api.exportPDF();
-    await api.close();
-
-    fs.writeFileSync('./output.pdf', new Uint8Array(arrayBuffer));
-  } catch (error) {
-    console.error(chalk.redLight(error.message));
-  }
-}
-
-loadList();
-// fillTemplate();
-// convertToPdf();
+generateRecords();
