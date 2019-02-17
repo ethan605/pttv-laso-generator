@@ -1,8 +1,50 @@
 import fs from 'fs';
 
+import _ from 'lodash';
 import chalk from 'chalk';
+import csv from 'csv';
 import docxWasm from '@nativedocuments/docx-wasm';
 import docxTemplates from 'docx-templates';
+
+function loadList() {
+  const input = String(fs.readFileSync('./input/list.csv'));
+
+  csv.parse(input, (error, rawRecords) => {
+    if (error != null) {
+      console.error(chalk.redLight(error.message));
+      return;
+    }
+
+    const records = _.slice(rawRecords, 1);
+    const list = _.map(records, rec => {
+      const [
+        id,
+        fullName,
+        gender,
+        birthHour,
+        birthDay,
+        birthMonth,
+        birthYear,
+        calendar,
+        explainationDetail,
+        ...rawQuestions
+      ] = rec;
+
+      // const questions =
+
+      return {
+        birthHour,
+        calendar,
+        fullName,
+        gender,
+        id,
+        birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
+      };
+    });
+
+    console.debug(list);
+  });
+}
 
 function fillTemplate() {
   try {
@@ -10,9 +52,6 @@ function fillTemplate() {
       template: './template.docx',
       output: './output.docx',
       cmdDelimiter: '~',
-      additionalJsContext: {
-        laso_image: () => ({ width: 12.7, height: 16.93, path: './laso_placeholder.jpg', extension: '.jpg' }),
-      },
       data: {
         full_name: 'Nguyễn Văn A',
         gender: 'Nam',
@@ -22,6 +61,7 @@ function fillTemplate() {
         contact_type: 'Số điện thoại',
         contact_detail: '0652455478',
         explaination_detail: 'Đương số tuổi Ngọ',
+        laso_image: { width: 12.7, height: 16.93, path: './laso_placeholder.jpg', extension: '.jpg' },
         questions: [
           {
             title: '1. Hỏi năm nay làm ăn được không?',
@@ -35,7 +75,7 @@ function fillTemplate() {
       },
     });
   } catch (error) {
-    console.error(chalk.red(error.message));
+    console.error(chalk.redLight(error.message));
   }
 }
 
@@ -55,9 +95,10 @@ async function convertToPdf() {
 
     fs.writeFileSync('./output.pdf', new Uint8Array(arrayBuffer));
   } catch (error) {
-    console.error(chalk.red(error.message));
+    console.error(chalk.redLight(error.message));
   }
 }
 
-fillTemplate();
-convertToPdf();
+loadList();
+// fillTemplate();
+// convertToPdf();
