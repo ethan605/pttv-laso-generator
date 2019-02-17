@@ -14,9 +14,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "chalk": "^2.4.2",
-    "docx4js": "^3.1.16",
-    "docxtemplater": "^3.9.8",
-    "jszip": "2",
+    "docx-templates": "^2.10.0",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
