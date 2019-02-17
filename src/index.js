@@ -1,9 +1,12 @@
+import fs from 'fs';
+
 import chalk from 'chalk';
-import generateDocx from 'docx-templates';
+import docxWasm from '@nativedocuments/docx-wasm';
+import docxTemplates from 'docx-templates';
 
 function fillTemplate() {
   try {
-    generateDocx({
+    docxTemplates({
       template: './template.docx',
       output: './output.docx',
       cmdDelimiter: '~',
@@ -36,4 +39,25 @@ function fillTemplate() {
   }
 }
 
+async function convertToPdf() {
+  try {
+    await docxWasm.init({
+      ENVIRONMENT: 'NODE',
+      LAZY_INIT: false,
+      ND_DEV_ID: '0P268FOEJBKENB0IUHDKD6JNUT',
+      ND_DEV_SECRET: '01J2TEPVHD3PDGA6G38PRCFMH4',
+    });
+
+    const api = await docxWasm.engine();
+    await api.load('./output.docx');
+    const arrayBuffer = await api.exportPDF();
+    await api.close();
+
+    fs.writeFileSync('./output.pdf', new Uint8Array(arrayBuffer));
+  } catch (error) {
+    console.error(chalk.red(error.message));
+  }
+}
+
 fillTemplate();
+convertToPdf();

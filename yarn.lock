@@ -641,6 +641,18 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@nativedocuments/docx-wasm@^2.2.8-1547344486":
+  version "2.2.8-1547344486"
+  resolved "https://registry.yarnpkg.com/@nativedocuments/docx-wasm/-/docx-wasm-2.2.8-1547344486.tgz#b164b2bd9363dda56e91534bb0b9994ccfe36313"
+  integrity sha512-LkfK0bWx6raazfKLqVsHi1vYbGCyUM5fZCz6txjYa4NK/fOelIErmmKwRlViqO7B91LqlBr0qLNihsv21lhphQ==
+  dependencies:
+    "@nativedocuments/fontpool" "1.0.0-v78032863279A6C0FF0C79E4D0E9A6BD0"
+
+"@nativedocuments/fontpool@1.0.0-v78032863279A6C0FF0C79E4D0E9A6BD0":
+  version "1.0.0-v78032863279A6C0FF0C79E4D0E9A6BD0"
+  resolved "https://registry.yarnpkg.com/@nativedocuments/fontpool/-/fontpool-1.0.0-v78032863279A6C0FF0C79E4D0E9A6BD0.tgz#2a91c5b59623a05e8353e1e3af4be08847ad765a"
+  integrity sha512-Y6ESmuRXmQfCQaPDSlmPtaRKEY/LkWkGRNI7oasf8rHmZDTVbo/ty3aNWYVGtwjQ8FEJKeojLd9irSb3+XBbCg==
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
