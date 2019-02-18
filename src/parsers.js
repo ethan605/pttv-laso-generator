@@ -10,7 +10,7 @@ function parseQuestions(questions) {
   const titles = _.filter(coupled, (__, idx) => idx % 2 === 0);
   const answers = _.reject(coupled, (__, idx) => idx % 2 === 0);
   const pairs = _.unzip([titles, answers]);
-  
+
   return _.map(pairs, ([title, answer], index) => ({
     answer: _.trim(answer),
     title: `${index + 1}. ${_.trim(title)}`,
@@ -32,10 +32,14 @@ function parseRecordRows(records) {
       ...rawQuestions
     ] = rec;
 
+    const explanationLines = _.split(explanation, /\n+/gi);
+    const newLines = new Array(explanationLines.length).fill('');
+
     const mainParagraphs = $.flow(
-      $.split(/\n+/gi),
-      $.map(line => `\n${_.trim(line)}`),
-    )(explanation);
+      $.map(_.trim),
+      $.zip(newLines),
+      $.flatten
+    )(explanationLines);
 
     const questions = parseQuestions(rawQuestions);
 
