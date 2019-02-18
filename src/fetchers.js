@@ -3,14 +3,10 @@ import cheerio from 'cheerio';
 import docxWasm from '@nativedocuments/docx-wasm';
 import qs from 'qs';
 
-import { HOURS_CONVERSION, LASO_IMAGE_CONFIGS } from './constants';
+import { DOCX_WASM_CONFIGS, HOURS_CONVERSION, LASO_IMAGE_CONFIGS } from './constants';
 
 export async function convertDocxToPdf(id) {
-  await docxWasm.init({
-    ...require('./docx-wasm.json'),
-    ENVIRONMENT: 'NODE',
-    LAZY_INIT: true,
-  });
+  await docxWasm.init(DOCX_WASM_CONFIGS);
 
   const api = await docxWasm.engine();
   await api.load(`./output/${id}.docx`);
