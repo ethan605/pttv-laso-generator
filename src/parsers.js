@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import $ from 'lodash/fp';
 import csv from 'csv';
 
 function parseQuestions(questions) {
@@ -9,7 +10,11 @@ function parseQuestions(questions) {
   const titles = _.filter(coupled, (__, idx) => idx % 2 === 0);
   const answers = _.reject(coupled, (__, idx) => idx % 2 === 0);
   const pairs = _.unzip([titles, answers]);
-  return _.map(pairs, ([title, answer], index) => ({ answer, title: `${index + 1}. ${title}` }));
+  
+  return _.map(pairs, ([title, answer], index) => ({
+    answer: _.trim(answer),
+    title: `${index + 1}. ${_.trim(title)}`,
+  }));
 }
 
 function parseRecordRows(records) {
@@ -27,7 +32,11 @@ function parseRecordRows(records) {
       ...rawQuestions
     ] = rec;
 
-    const mainParagraphs = _.split(explanation, '\n');
+    const mainParagraphs = $.flow(
+      $.split(/\n+/gi),
+      $.map(line => `\n${_.trim(line)}`),
+    )(explanation);
+
     const questions = parseQuestions(rawQuestions);
 
     return {
@@ -57,7 +66,8 @@ export function parseCsv(csvData) {
         return;
       }
 
-      const records = _.slice(rawRecords, 1);
+      // Filter records with valid ID
+      const records = _.filter(rawRecords, ([id]) => _.startsWith(id, 'OLN'));
       resolve(parseRecordRows(records));
     });
   });

@@ -22,7 +22,7 @@ export async function fetchLasoImage(record) {
   const body = {
     anh_mau: '1',
     gio_duong: HOURS_CONVERSION[birthHour],
-    gioi_tinh: gender === 'male' ? '1' : '0',
+    gioi_tinh: gender === 'Nam' ? '1' : '0',
     ho_ten: id,
     loai_lich: '1',
     luutru: '1',
