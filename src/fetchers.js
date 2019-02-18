@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import axios from 'axios';
 import cheerio from 'cheerio';
 import docxWasm from '@nativedocuments/docx-wasm';
@@ -19,7 +17,7 @@ export async function convertDocxToPdf(id) {
   const arrayBuffer = await api.exportPDF();
   await api.close();
 
-  fs.writeFileSync(`./output/${id}.pdf`, new Uint8Array(arrayBuffer));
+  return new Uint8Array(arrayBuffer);
 }
 
 export async function fetchLasoImage(record) {
