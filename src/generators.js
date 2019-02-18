@@ -33,12 +33,12 @@ export async function generateReports(toPdf = false) {
     const csvData = fs.readFileSync('./input.csv');
     const allRecords = await parseCsv(csvData);
     
-    _.each(allRecords, record => {
+    _.each(allRecords, async record => {
       const { id } = record;
       generateDocx(record);
 
       if (toPdf) {
-        const pdfData = convertDocxToPdf(id);
+        const pdfData = await convertDocxToPdf(id);
         fs.writeFileSync(`./output/${id}.pdf`, pdfData);
       }
     });

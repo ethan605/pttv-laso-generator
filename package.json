@@ -6,11 +6,7 @@
   "author": "Ethan Nguyen <thanhnx.605@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "rm -rf dst/",
-    "build": "babel src/ -d dst/",
-    "postbuild": "uglifyjs dst/* -c -m -o bundle/index.js",
-    "start": "rm -rf output/ && babel-node src/index.js",
-    "watch": "babel -w src/ -d dist/"
+    "generate": "rm -rf output/* && babel-node src/index.js"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
