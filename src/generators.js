@@ -8,22 +8,26 @@ import { convertDocxToPdf, fetchLasoImage } from './fetchers';
 import { parseCsv } from './parsers';
 
 async function generateDocx(record) {
-  const { birthDay, birthMonth, birthYear, id, ...rest } = record;
-  const lasoImage = fetchLasoImage(record);
+  try {
+    const { birthDay, birthMonth, birthYear, id, ...rest } = record;
+    const lasoImage = fetchLasoImage(record);
+    
+    const data = {
+      ...rest,
+      lasoImage,
+      birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
+    };
   
-  const data = {
-    ...rest,
-    lasoImage,
-    birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
-  };
-
-  docxTemplates({
-    data,
-    cmdDelimiter: '~',
-    output: `./output/${id}.docx`,
-    processLineBreaks: true,
-    template: './template.docx',
-  });
+    await docxTemplates({
+      data,
+      cmdDelimiter: '~',
+      output: `./output/${id}.docx`,
+      processLineBreaks: true,
+      template: './template.docx',
+    });
+  } catch (error) {
+    console.error(chalk.redBright(error.message));
+  }
 }
 
 /* eslint-disable import/prefer-default-export */
@@ -35,7 +39,7 @@ export async function generateReports(toPdf = false) {
     
     _.each(allRecords, async record => {
       const { id } = record;
-      generateDocx(record);
+      await generateDocx(record);
 
       if (toPdf) {
         const pdfData = await convertDocxToPdf(id);

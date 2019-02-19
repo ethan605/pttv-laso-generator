@@ -1,4 +1,5 @@
 import axios from 'axios';
+import chalk from 'chalk';
 import cheerio from 'cheerio';
 import docxWasm from '@nativedocuments/docx-wasm';
 import qs from 'qs';
@@ -6,14 +7,18 @@ import qs from 'qs';
 import { DOCX_WASM_CONFIGS, HOURS_CONVERSION, LASO_IMAGE_CONFIGS } from './constants';
 
 export async function convertDocxToPdf(id) {
-  await docxWasm.init(DOCX_WASM_CONFIGS);
-
-  const api = await docxWasm.engine();
-  await api.load(`./output/${id}.docx`);
-  const arrayBuffer = await api.exportPDF();
-  await api.close();
-
-  return new Uint8Array(arrayBuffer);
+  try {
+    await docxWasm.init(DOCX_WASM_CONFIGS);
+  
+    const api = await docxWasm.engine();
+    await api.load(`./output/${id}.docx`);
+    const arrayBuffer = await api.exportPDF();
+    await api.close();
+  
+    return new Uint8Array(arrayBuffer);
+  } catch (error) {
+    console.error(chalk.redBright(error.message));
+  }
 }
 
 export async function fetchLasoImage(record) {
