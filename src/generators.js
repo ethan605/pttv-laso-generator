@@ -10,7 +10,9 @@ import { parseCsv } from './parsers';
 async function generateDocx(record) {
   try {
     const { birthDay, birthMonth, birthYear, id, ...rest } = record;
-    const lasoImage = fetchLasoImage(record);
+    console.log(chalk.greenBright(`Generating report for ID ${id}`));
+
+    const lasoImage = await fetchLasoImage(record);
     
     const data = {
       ...rest,
@@ -34,6 +36,7 @@ async function generateDocx(record) {
 
 export async function generateReports(toPdf = false) {
   try {
+    console.log(chalk.yellowBright('Parsing input data'));
     const csvData = fs.readFileSync('./input.csv');
     const allRecords = await parseCsv(csvData);
     

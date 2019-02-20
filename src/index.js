@@ -1,3 +1,3 @@
 import { generateReports } from './generators';
 
-generateReports(true);
+generateReports(/* true */);

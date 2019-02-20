@@ -37,6 +37,7 @@ function parseRecordRows(records) {
 
     const mainParagraphs = $.flow(
       $.map(_.trim),
+      $.map(line => _.replace(line, /^-\s+/, '')),
       $.zip(newLines),
       $.flatten
     )(explanationLines);

@@ -40,7 +40,7 @@ export async function fetchLasoImage(record) {
 
   const { data: pageHtml } = await axios.post('https://tuvivietnam.vn/index.php?anlaso/laso', qs.stringify(body));
   const $ = cheerio.load(pageHtml);
-  const imageLink = $('input#barCopy')[0].attribs.value;
+  const imageLink = $('div.content_wrap_laso > img')[0].attribs.src;
   const { data: imageData } = await axios.get(imageLink, { responseType: 'arraybuffer' });
   const buffer = Buffer.alloc(imageData.length, imageData, 'binary');
   const data = buffer.toString('base64');
