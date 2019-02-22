@@ -1,8 +1,8 @@
 {
-  "name": "pttv-laso-generator",
+  "name": "zcr-reporter-script",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:ethan605/pttv-laso-generator.git",
+  "repository": "git@github.com:pttv/zcr-reporter-script.git",
   "author": "Ethan Nguyen <thanhnx.605@gmail.com>",
   "license": "MIT",
   "scripts": {
