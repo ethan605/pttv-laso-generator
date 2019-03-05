@@ -1,7 +1,9 @@
-export const DOCX_WASM_CONFIGS = {
-  ND_DEV_ID: '0P268FOEJBKENB0IUHDKD6JNUT',
-  ND_DEV_SECRET: '01J2TEPVHD3PDGA6G38PRCFMH4',
-};
+export const BASE64_IMAGE_PREFIX = 'data:image/png;base64,';
+
+export const CHART_GENERATOR_URL = 'https://tuvivietnam.vn/index.php?anlaso/laso';
+export const CORS_ANYWHERE_URL = 'https://cors-anywhere.herokuapp.com/';
+
+export const GENERAL_SECTION_ORDERS = ['I', 'II', 'III', 'IV'];
 
 export const HOURS_CONVERSION = {
   Tý: '00',
@@ -17,5 +19,3 @@ export const HOURS_CONVERSION = {
   Tuất: '20',
   Hợi: '22',
 };
-
-export const LASO_IMAGE_CONFIGS = { extension: '.jpg', height: 16.93, width: 12.7 };

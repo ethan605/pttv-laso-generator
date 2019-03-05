@@ -1,55 +1,29 @@
-import fs from 'fs';
+import Handlebars from 'handlebars/runtime';
+import { fetchChartImage } from './fetchers';
 
-import _ from 'lodash';
-import chalk from 'chalk';
-import docxTemplates from 'docx-templates';
+import './configs/report.handlebars';
 
-import { convertDocxToPdf, fetchLasoImage } from './fetchers';
-import { parseCsv } from './parsers';
+const INJECTED_VALUES = {
+  currentYear: new Date().getFullYear(),
+  publicPath: process.env.PUBLIC_PATH,
+};
 
-async function generateDocx(record) {
-  try {
-    const { birthDay, birthMonth, birthYear, id, ...rest } = record;
-    console.log(chalk.greenBright(`Generating report for ID ${id}`));
-
-    const lasoImage = await fetchLasoImage(record);
-    
-    const data = {
-      ...rest,
-      lasoImage,
-      birthDate: `${birthDay}/${birthMonth}/${birthYear}`,
-    };
-  
-    await docxTemplates({
-      data,
-      cmdDelimiter: '~',
-      output: `./output/${id}.docx`,
-      processLineBreaks: true,
-      template: './template.docx',
-    });
-  } catch (error) {
-    console.error(chalk.redBright(error.message));
-  }
+function registerPartials() {
+  Handlebars.registerPartial('chartImage', Handlebars.templates.chart_image);
+  Handlebars.registerPartial('clientInfo', Handlebars.templates.client_info);
+  Handlebars.registerPartial('footer', Handlebars.templates.footer);
+  Handlebars.registerPartial('generalReadings', Handlebars.templates.general_readings);
+  Handlebars.registerPartial('header', Handlebars.templates.header);
+  Handlebars.registerPartial('htmlHead', Handlebars.templates.html_head);
+  Handlebars.registerPartial('opportunities', Handlebars.templates.opportunities);
+  Handlebars.registerPartial('questions', Handlebars.templates.questions);
 }
+
+registerPartials();
 
 /* eslint-disable import/prefer-default-export */
 
-export async function generateReports(toPdf = false) {
-  try {
-    console.log(chalk.yellowBright('Parsing input data'));
-    const csvData = fs.readFileSync('./input.csv');
-    const allRecords = await parseCsv(csvData);
-    
-    _.each(allRecords, async record => {
-      const { id } = record;
-      await generateDocx(record);
-
-      if (toPdf) {
-        const pdfData = await convertDocxToPdf(id);
-        fs.writeFileSync(`./output/${id}.pdf`, pdfData);
-      }
-    });
-  } catch (error) {
-    console.error(chalk.redBright(error.message));
-  }
+export async function renderChartReading(record) {
+  const chartImage = await fetchChartImage(record);
+  return Handlebars.templates.report({ ...INJECTED_VALUES, ...record, chartImage });
 }

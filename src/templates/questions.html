@@ -1,0 +1,13 @@
+{{#if questions}}
+  <div class="content">
+    <div class="section-title"><strong>Câu hỏi</strong></div>
+    {{#each questions}}
+    <div class="text-block">
+      <h3>{{title}}</h3>
+      {{#each answer}}
+        <p>{{this}}</p>
+      {{/each}}
+    </div>
+    {{/each}}
+  </div>
+{{/if}}

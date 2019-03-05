@@ -1,28 +1,19 @@
 import axios from 'axios';
-import chalk from 'chalk';
 import cheerio from 'cheerio';
-import docxWasm from '@nativedocuments/docx-wasm';
 import qs from 'qs';
 
-import { DOCX_WASM_CONFIGS, HOURS_CONVERSION, LASO_IMAGE_CONFIGS } from './constants';
+import {
+  /* BASE64_IMAGE_PREFIX, */ CHART_GENERATOR_URL,
+  CORS_ANYWHERE_URL,
+  HOURS_CONVERSION,
+} from './constants';
 
-export async function convertDocxToPdf(id) {
-  try {
-    await docxWasm.init(DOCX_WASM_CONFIGS);
-  
-    const api = await docxWasm.engine();
-    await api.load(`./output/${id}.docx`);
-    const arrayBuffer = await api.exportPDF();
-    await api.close();
-  
-    return new Uint8Array(arrayBuffer);
-  } catch (error) {
-    console.error(chalk.redBright(error.message));
-  }
-}
+/* eslint-disable import/prefer-default-export */
 
-export async function fetchLasoImage(record) {
-  const { birthDay, birthHour, birthMonth, birthYear, gender, id } = record;
+export async function fetchChartImage(record) {
+  const {
+    birthDay, birthHour, birthMonth, birthYear, gender, id,
+  } = record;
 
   const body = {
     anh_mau: '1',
@@ -30,7 +21,7 @@ export async function fetchLasoImage(record) {
     gioi_tinh: gender === 'Nam' ? '1' : '0',
     ho_ten: id,
     loai_lich: '1',
-    luutru: '1',
+    luutru: '0',
     nam_duong: birthYear,
     nam_xem: '2019',
     ngay_duong: birthDay,
@@ -38,11 +29,20 @@ export async function fetchLasoImage(record) {
     thang_duong: birthMonth,
   };
 
-  const { data: pageHtml } = await axios.post('https://tuvivietnam.vn/index.php?anlaso/laso', qs.stringify(body));
-  const $ = cheerio.load(pageHtml);
-  const imageLink = $('div.content_wrap_laso > img')[0].attribs.src;
-  const { data: imageData } = await axios.get(imageLink, { responseType: 'arraybuffer' });
-  const buffer = Buffer.alloc(imageData.length, imageData, 'binary');
-  const data = buffer.toString('base64');
-  return { ...LASO_IMAGE_CONFIGS, data };
+  const { data: pageHtml } = await axios.post(
+    CORS_ANYWHERE_URL + CHART_GENERATOR_URL,
+    qs.stringify(body),
+    { Origin: 'null' },
+  );
+  const selector = cheerio.load(pageHtml);
+  const imageLink = selector('div.content_wrap_laso > img')[0].attribs.src;
+  const imageUrl = new URL(imageLink);
+  return imageUrl.origin + imageUrl.pathname;
+
+  // const { data: pageHtml } = await axios.post(CHART_GENERATOR_URL, qs.stringify(body));
+  // const selector = cheerio.load(pageHtml);
+  // const imageLink = selector('div.content_wrap_laso > img')[0].attribs.src;
+  // const { data: imageData } = await axios.get(imageLink, { responseType: 'arraybuffer' });
+  // const imageBase64 = Buffer.alloc(imageData.byteLength, imageData, 'binary').toString('base64');
+  // return `data:image/png;base64,${imageBase64}`;
 }
