@@ -6,7 +6,7 @@
   "author": "Ethan Nguyen <thanhnx.605@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "generate": "rm -rf output/* && babel-node src/index.js"
+    "generate": "PUBLIC_PATH=https://tuvi.phongthuytaivan.vn babel-node ./src/app.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
