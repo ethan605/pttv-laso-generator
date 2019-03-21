@@ -13,7 +13,8 @@ async function parseAndGenerate() {
     _.each(records, async record => {
       const { checksum, id } = record;
       const report = await renderChartReading(record);
-      fs.writeFileSync(`./outputs/${id}_${checksum.substring(checksum.length - 6)}.html`, report, 'utf-8');
+      const fileName = `${id}_${checksum.substring(checksum.length - 6)}`;
+      fs.writeFileSync(`./outputs/${fileName}.html`, report, 'utf-8');
     });
   } catch (error) {
     console.error(error);
