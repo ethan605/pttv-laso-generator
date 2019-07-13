@@ -6,7 +6,8 @@
   "author": "Ethan Nguyen <thanhnx.605@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "generate": "PUBLIC_PATH=https://tuvi.phongthuytaivan.vn babel-node ./src/app.js"
+    "generate": "PUBLIC_PATH=https://tuvi.phongthuytaivan.vn babel-node ./src/app.js",
+    "precompile-templates": "handlebars -m -e html src/templates -f src/configs/report.handlebars -c handlebars/runtime"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
